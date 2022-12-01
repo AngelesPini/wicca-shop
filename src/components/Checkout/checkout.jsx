@@ -1,7 +1,7 @@
 import React from "react"
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from '../../context/cartContext.js'
 import { crearOrden, getProducto, updateProducto } from "../../assets/firebase.js";
 import { toast } from "react-toastify";
@@ -12,12 +12,20 @@ const Checkout = () => {
     let navigate = useNavigate()
     const {cart, emptyCart, totalPrice} = useContext(CartContext);
 
+    
+    const [mail, setMail] = useState("")
+    const [mailConf, setMailConf] = useState("")
+
     const consultarFormulario= (e) =>{
         e.preventDefault()
         const datForm = new FormData(datosFormulario.current)
         const valoresObtenidos = Object.fromEntries(datForm)
         const aux = [...cart]
         console.log(aux)
+        if (mail != mailConf){
+            toast.error("El email debe coincidir");
+            return;
+        }
         aux.forEach(producto =>{
             getProducto(producto.id).then(prod =>{
                 producto.stock -= producto.cant
@@ -37,7 +45,6 @@ const Checkout = () => {
         })
 
     }
-
 
 
     return (
@@ -67,14 +74,25 @@ const Checkout = () => {
                 </div>
                 <div className="col-md-12">
                     <label htmlFor="email" className="form-label">Email</label>
-                    <input type="text" className="form-control" name='email' required />
+                    <input type="email" className="form-control" name='email' 
+                    value={mail}
+                    onChange={(event) => setMail(event.target.value)}
+                    required />
+
+                </div>
+                <div className="col-md-12">
+                    <label htmlFor="email" className="form-label">Confirmar Email</label>
+                    <input type="email" className="form-control" name='email' 
+                    value={mailConf}
+                    onChange={(event) => setMailConf(event.target.value)}
+                    required />
 
                 </div>
                 <div className="col-md-12">
                     <label htmlFor="telefono" className="form-label">Telefono</label>
                     <input type="number" className="form-control" name='telefono' required />
                 </div>
-                    <button type='submit' className='btn-principal'>Confirmar</button>
+                    <button type='submit' className='btn-principal m-3'>Confirmar</button>
 
                 </form>
         </div>
@@ -82,79 +100,3 @@ const Checkout = () => {
 }
 
 export default Checkout;
-// import React, {useContext} from "react"
-// import { useNavigate, Link } from "react-router-dom";
-// import { crearOrden, getProducto, updateProducto } from "../../assets/firebase"
-// import { CartContext } from "../../context/cartContext"
-
-
-// const Checkout = () => {
-//     const datosFormulario = React.useRef()
-//     let navigate = useNavigate()
-//     const {cart,emptyCart, totalPrice} = useContext(CartContext);
-
-//     const consultarFormulario = (e) => {
-//         e.preventDefault()
-//         const datForm = new FormData(datosFormulario.current)
-//         const valores = Object.fromEntries(datForm)
-//         const aux = [...cart]
-//         aux.forEach(producto => {
-//             getProducto(producto.id)
-//             .then(prod => {
-//                 prod.stock -= producto.cant
-//                 updateProducto(producto.id, prod)
-//             })
-//         })
-        
-//         crearOrden(valores, totalPrice(), new Date().toISOString().slice(0, 10)).then(orden => {
-//             alert(`Su orden ${orden.id} fue creada con éxito`)
-//             emptyCart()
-//             e.target.reset()
-//             navigate("/")
-          
-//         }).catch(error => {
-//             alert(`Su orden no fue creada con éxito`)
-//             console.error(error)
-//         })
-        
-//     }
-
-//     return (
-//         <div className="container">
-//             <form onSubmit={consultarFormulario} ref={datosFormulario}>
-//                 <div className="mb-3">
-//                     <label htmlFor="nombre" className="form-label">Nombre</label>
-//                     <input type="text" className="form-control" name="nombre" />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label htmlFor="apellido" className="form-label">Apellido</label>
-//                     <input type="text" className="form-control" name="apellido" />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label htmlFor="email" className="form-label">Email</label>
-//                     <input type="email" className="form-control" name="email" />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label htmlFor="dni" className="form-label">DNI</label>
-//                     <input type="number" className="form-control" name="dni" />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label htmlFor="celular" className="form-label">Numero telefonico</label>
-//                     <input type="number" className="form-control" name="celular" />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label htmlFor="direccion" className="form-label">Dirección</label>
-//                     <input type="text" className="form-control" name="direccion" />
-//                 </div>
-                   
-//                         <button type="submit" className="btn btn-primary">Finalizar Compra</button>
-                    
-                    
-        
-//             </form>
-
-//         </div>
-//     );
-// }
-
-// export default Checkout;
